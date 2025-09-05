@@ -7,25 +7,16 @@ const ClientList = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/clients").then((response) => {
-      console.log(response);
-      setClients(response.data.data);
+    axios.get("http://localhost:5000/api/clients").then((res) => {
+      setClients(res.data.data);
     });
   }, []);
-
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`http://localhost:5000/api/clients/${id}`);
-      setClients(clients.filter((client) => client._id !== id));
-    } catch (err) {
-      console.error(err?.response?.data || err);
-    }
-  };
 
   return (
     <div>
       <h1>Client List</h1>
-      <Link to="/client-form">Add Client</Link>
+      <Link to="/">Index</Link>
+      <Link to="/clients/form">Add Client</Link>
       <table>
         <thead>
           <tr>

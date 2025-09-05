@@ -1,11 +1,11 @@
 // validators/inverter.validator.js
 import {
-  extractFields,
+  extractAllowedFields,
   isNonEmpty,
   isNonNegative,
   isPositive,
   parseNumber,
-  parseString
+  parseString,
 } from "../utils/helpers.js";
 
 const ALLOWED_FIELDS = [
@@ -31,7 +31,7 @@ const MPPT_ALLOWED_FIELDS = [
 ];
 
 export const validateInverterData = (req, res, next) => {
-  const data = extractFields(req.body || {}, ALLOWED_FIELDS);
+  const data = extractAllowedFields(req.body || {}, ALLOWED_FIELDS);
   const errors = [];
 
   // maker
@@ -86,7 +86,7 @@ export const validateInverterData = (req, res, next) => {
     });
   } else {
     data.mpptConfig = data.mpptConfig.map((mpptRaw, index) => {
-      const mppt = extractFields(mpptRaw, MPPT_ALLOWED_FIELDS);
+      const mppt = extractAllowedFields(mpptRaw, MPPT_ALLOWED_FIELDS);
 
       // startUpVoltage
       if (!isNonEmpty(mppt.startUpVoltage)) {

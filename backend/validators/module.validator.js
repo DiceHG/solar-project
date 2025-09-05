@@ -1,6 +1,6 @@
 // validators/module.validator.js
 import {
-  extractFields,
+  extractAllowedFields,
   isNonEmpty,
   isPositive,
   parseNumber,
@@ -21,7 +21,7 @@ const ALLOWED_FIELDS = [
 ];
 
 export const validateModuleData = (req, res, next) => {
-  const data = extractFields(req.body || {}, ALLOWED_FIELDS);
+  const data = extractAllowedFields(req.body || {}, ALLOWED_FIELDS);
   const errors = [];
 
   // maker
