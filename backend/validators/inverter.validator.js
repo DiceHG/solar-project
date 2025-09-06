@@ -13,11 +13,11 @@ const ALLOWED_FIELDS = [
   "model",
   "inmetro",
   "datasheetUrl",
-  "inputPower",
+  "maxInputPower",
   "mpptConfig",
-  "outputPower",
-  "outputVoltage",
-  "outputCurrent",
+  "maxOutputPower",
+  "maxOutputVoltage",
+  "maxOutputCurrent",
   "phaseType",
   "frequency",
   "efficiency",
@@ -25,8 +25,8 @@ const ALLOWED_FIELDS = [
 
 const MPPT_ALLOWED_FIELDS = [
   "startUpVoltage",
-  "maxVoltage",
-  "maxCurrent",
+  "inputVoltage",
+  "maxInputCurrent",
   "numOfStrings",
 ];
 
@@ -62,18 +62,18 @@ export const validateInverterData = (req, res, next) => {
     data.datasheetUrl = parseString(data.datasheetUrl);
   }
 
-  // inputPower
-  if (!isNonEmpty(data.inputPower)) {
+  // maxInputPower
+  if (!isNonEmpty(data.maxInputPower)) {
     errors.push({
-      field: "inputPower",
-      message: "inputPower is required",
+      field: "maxInputPower",
+      message: "maxInputPower is required",
     });
   } else {
-    data.inputPower = parseNumber(data.inputPower);
-    if (!isPositive(data.inputPower)) {
+    data.maxInputPower = parseNumber(data.maxInputPower);
+    if (!isPositive(data.maxInputPower)) {
       errors.push({
-        field: "inputPower",
-        message: "Invalid inputPower value",
+        field: "maxInputPower",
+        message: "Invalid maxInputPower value",
       });
     }
   }
@@ -104,34 +104,50 @@ export const validateInverterData = (req, res, next) => {
         }
       }
 
-      // maxVoltage
-      if (!isNonEmpty(mppt.maxVoltage)) {
+      // inputVoltage.min
+      if (!isNonEmpty(mppt.inputVoltage.min)) {
         errors.push({
-          field: `mpptConfig[${index}].maxVoltage`,
-          message: "maxVoltage is required",
+          field: `mpptConfig[${index}].inputVoltage.min`,
+          message: "inputVoltage.min is required",
         });
       } else {
-        mppt.maxVoltage = parseNumber(mppt.maxVoltage);
-        if (!isPositive(mppt.maxVoltage)) {
+        mppt.inputVoltage.min = parseNumber(mppt.inputVoltage.min);
+        if (!isPositive(mppt.inputVoltage.min)) {
           errors.push({
-            field: `mpptConfig[${index}].maxVoltage`,
-            message: "Invalid maxVoltage value",
+            field: `mpptConfig[${index}].inputVoltage.min`,
+            message: "Invalid inputVoltage.min value",
           });
         }
       }
 
-      // maxCurrent
-      if (!isNonEmpty(mppt.maxCurrent)) {
+      // inputVoltage.max
+      if (!isNonEmpty(mppt.inputVoltage.max)) {
         errors.push({
-          field: `mpptConfig[${index}].maxCurrent`,
-          message: "maxCurrent is required",
+          field: `mpptConfig[${index}].inputVoltage.max`,
+          message: "inputVoltage.max is required",
         });
       } else {
-        mppt.maxCurrent = parseNumber(mppt.maxCurrent);
-        if (!isPositive(mppt.maxCurrent)) {
+        mppt.inputVoltage.max = parseNumber(mppt.inputVoltage.max);
+        if (!isPositive(mppt.inputVoltage.max)) {
           errors.push({
-            field: `mpptConfig[${index}].maxCurrent`,
-            message: "Invalid maxCurrent value",
+            field: `mpptConfig[${index}].inputVoltage.max`,
+            message: "Invalid inputVoltage.max value",
+          });
+        }
+      }
+
+      // maxInputCurrent
+      if (!isNonEmpty(mppt.maxInputCurrent)) {
+        errors.push({
+          field: `mpptConfig[${index}].maxInputCurrent`,
+          message: "maxInputCurrent is required",
+        });
+      } else {
+        mppt.maxInputCurrent = parseNumber(mppt.maxInputCurrent);
+        if (!isPositive(mppt.maxInputCurrent)) {
+          errors.push({
+            field: `mpptConfig[${index}].maxInputCurrent`,
+            message: "Invalid maxInputCurrent value",
           });
         }
       }
@@ -156,47 +172,50 @@ export const validateInverterData = (req, res, next) => {
     });
   }
 
-  // outputPower
-  if (!isNonEmpty(data.outputPower)) {
-    errors.push({ field: "outputPower", message: "outputPower is required" });
+  // maxOutputPower
+  if (!isNonEmpty(data.maxOutputPower)) {
+    errors.push({
+      field: "maxOutputPower",
+      message: "maxOutputPower is required",
+    });
   } else {
-    data.outputPower = parseNumber(data.outputPower);
-    if (!isPositive(data.outputPower)) {
+    data.maxOutputPower = parseNumber(data.maxOutputPower);
+    if (!isPositive(data.maxOutputPower)) {
       errors.push({
-        field: "outputPower",
-        message: "Invalid outputPower value",
+        field: "maxOutputPower",
+        message: "Invalid maxOutputPower value",
       });
     }
   }
 
-  // outputVoltage
-  if (!isNonEmpty(data.outputVoltage)) {
+  // maxOutputVoltage
+  if (!isNonEmpty(data.maxOutputVoltage)) {
     errors.push({
-      field: "outputVoltage",
-      message: "outputVoltage is required",
+      field: "maxOutputVoltage",
+      message: "maxOutputVoltage is required",
     });
   } else {
-    data.outputVoltage = parseNumber(data.outputVoltage);
-    if (!isPositive(data.outputVoltage)) {
+    data.maxOutputVoltage = parseNumber(data.maxOutputVoltage);
+    if (!isPositive(data.maxOutputVoltage)) {
       errors.push({
-        field: "outputVoltage",
-        message: "Invalid outputVoltage value",
+        field: "maxOutputVoltage",
+        message: "Invalid maxOutputVoltage value",
       });
     }
   }
 
-  // outputCurrent
-  if (!isNonEmpty(data.outputCurrent)) {
+  // maxOutputCurrent
+  if (!isNonEmpty(data.maxOutputCurrent)) {
     errors.push({
-      field: "outputCurrent",
-      message: "outputCurrent is required",
+      field: "maxOutputCurrent",
+      message: "maxOutputCurrent is required",
     });
   } else {
-    data.outputCurrent = parseNumber(data.outputCurrent);
-    if (!isPositive(data.outputCurrent)) {
+    data.maxOutputCurrent = parseNumber(data.maxOutputCurrent);
+    if (!isPositive(data.maxOutputCurrent)) {
       errors.push({
-        field: "outputCurrent",
-        message: "Invalid outputCurrent value",
+        field: "maxOutputCurrent",
+        message: "Invalid maxOutputCurrent value",
       });
     }
   }

@@ -1,9 +1,9 @@
 import { Routes, Route } from "react-router";
-import ClientForm from "./clients/pages/ClientForm";
-import ClientList from "./clients/pages/ClientList";
-import ClientPage from "./clients/pages/ClientPage";
-import InverterForm from "./equipments/pages/InverterForm";
-import Equipments from "./equipments/pages/Equipments";
+import ClientForm from "./clients/ClientForm";
+import ClientList from "./clients/ClientList";
+import ClientPage from "./clients/ClientPage";
+import InverterForm from "./equipments/InverterForm";
+import EquipmentCatalog from "./equipments/EquipmentCatalog";
 import Index from "./Index";
 const App = () => {
   return (
@@ -17,8 +17,8 @@ const App = () => {
       </Route>
 
       <Route path="equipments">
-        <Route index element={<Equipments />} />
-        <Route path="inverters/form" element={<InverterForm mode="create" />} />
+        <Route index element={<EquipmentCatalog />} />
+        <Route path="inverter/form" element={<InverterForm mode="create" />} />
       </Route>
 
       <Route path="concerts">

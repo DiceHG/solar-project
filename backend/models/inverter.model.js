@@ -3,9 +3,12 @@ import mongoose, { Schema } from "mongoose";
 
 const mpptSchema = new Schema(
   {
-    startUpVoltage: { type: Number, required: true, min: 0 },
-    maxVoltage: { type: Number, required: true, min: 0 },
-    maxCurrent: { type: Number, required: true, min: 0 },
+    startUpVoltage: { type: Number, required: true },
+    inputVoltage: {
+      min: { type: Number, required: true },
+      max: { type: Number, required: true },
+    },
+    maxInputCurrent: { type: Number, required: true, min: 0 },
     numOfStrings: { type: Number, required: true, min: 1, default: 1 },
   },
   { _id: false }
@@ -20,17 +23,16 @@ const inverterSchema = new Schema(
     datasheetUrl: { type: String },
 
     // Input DC
-    inputPower: { type: Number, min: 0, required: true }, // kW (DC)
+    maxInputPower: { type: Number, min: 0, required: true }, // kW (DC)
     mpptConfig: { type: [mpptSchema], required: true },
 
     // Output AC
-    outputPower: { type: Number, required: true, min: 0 }, // kW (AC)
-    outputVoltage: { type: Number, required: true, default: 220 }, // V (AC)
-    outputCurrent: { type: Number, min: 0, required: true }, // A (AC)
+    maxOutputPower: { type: Number, required: true, min: 0 }, // kW (AC)
+    maxOutputVoltage: { type: Number, required: true, default: 220 }, // V (AC)
+    maxOutputCurrent: { type: Number, min: 0, required: true }, // A (AC)
     phaseType: {
       type: String,
       enum: ["single-phase", "three-phase"],
-      required: true,
       default: "single-phase",
     },
     frequency: { type: Number, default: 60 }, // Hz
@@ -41,6 +43,7 @@ const inverterSchema = new Schema(
   }
 );
 
-const InverterModel = mongoose.models.Inverter || mongoose.model("Inverter", inverterSchema);
+const InverterModel =
+  mongoose.models.Inverter || mongoose.model("Inverter", inverterSchema);
 
 export default InverterModel;

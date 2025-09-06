@@ -51,10 +51,10 @@ export const createClient = async (req, res, next) => {
 
   try {
     if (payload.docNumber) {
-      const existing = await ClientModel.findOne({
+      const docExist = await ClientModel.findOne({
         docNumber: payload.docNumber,
       }).lean();
-      if (existing) {
+      if (docExist) {
         return res
           .status(409)
           .json({ success: false, message: "Client already registered." });
@@ -72,7 +72,7 @@ export const createClient = async (req, res, next) => {
 // PUT api/clients/:id
 export const updateClient = async (req, res, next) => {
   const { id } = req.params;
-  const payload = req.validatedData;
+  const payload = { ...req.validatedData };
 
   if (!mongoose.isValidObjectId(id)) {
     return res

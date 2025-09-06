@@ -4,9 +4,8 @@ import cors from "cors";
 
 import { connectDB } from "./config/db.js";
 
-import clientRoutes from "./routes/client.route.js";
-import inverterRoutes from "./routes/inverter.route.js";
-import moduleRoutes from "./routes/module.route.js";
+import clientRoute from "./routes/client.route.js";
+import inverterRoute from "./routes/inverter.route.js";
 
 dotenv.config();
 
@@ -17,9 +16,8 @@ app.use(cors());
 
 app.use(express.json());
 
-app.use("/api/clients", clientRoutes);
-app.use("/api/inverters", inverterRoutes);
-app.use("/api/modules", moduleRoutes);
+app.use("/api/clients", clientRoute);
+app.use("/api/inverters", inverterRoute);
 
 connectDB().then(() => {
   app.listen(PORT, (err) => {
