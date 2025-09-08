@@ -14,21 +14,18 @@ const ALLOWED_FIELDS = [
   "inmetro",
   "datasheetUrl",
   "maxInputPower",
+  "startUpVoltage",
+  "inputVoltage",
   "mpptConfig",
   "maxOutputPower",
-  "maxOutputVoltage",
+  "nominalVoltage",
   "maxOutputCurrent",
   "phaseType",
   "frequency",
   "efficiency",
 ];
 
-const MPPT_ALLOWED_FIELDS = [
-  "startUpVoltage",
-  "inputVoltage",
-  "maxInputCurrent",
-  "numOfStrings",
-];
+const MPPT_ALLOWED_FIELDS = ["maxInputCurrent", "stringCount"];
 
 export const validateInverterData = (req, res, next) => {
   const data = extractAllowedFields(req.body || {}, ALLOWED_FIELDS);
@@ -78,6 +75,54 @@ export const validateInverterData = (req, res, next) => {
     }
   }
 
+  // startUpVoltage
+  if (!isNonEmpty(data.startUpVoltage)) {
+    errors.push({
+      field: `startUpVoltage`,
+      message: "startUpVoltage is required",
+    });
+  } else {
+    data.startUpVoltage = parseNumber(data.startUpVoltage);
+    if (!isPositive(data.startUpVoltage)) {
+      errors.push({
+        field: `startUpVoltage`,
+        message: "Invalid startUpVoltage value",
+      });
+    }
+  }
+
+  // inputVoltage.min
+  if (!isNonEmpty(data.inputVoltage.min)) {
+    errors.push({
+      field: `inputVoltage.min`,
+      message: "inputVoltage.min is required",
+    });
+  } else {
+    data.inputVoltage.min = parseNumber(data.inputVoltage.min);
+    if (!isPositive(data.inputVoltage.min)) {
+      errors.push({
+        field: `inputVoltage.min`,
+        message: "Invalid inputVoltage.min value",
+      });
+    }
+  }
+
+  // inputVoltage.max
+  if (!isNonEmpty(data.inputVoltage.max)) {
+    errors.push({
+      field: `inputVoltage.max`,
+      message: "inputVoltage.max is required",
+    });
+  } else {
+    data.inputVoltage.max = parseNumber(data.inputVoltage.max);
+    if (!isPositive(data.inputVoltage.max)) {
+      errors.push({
+        field: `inputVoltage.max`,
+        message: "Invalid inputVoltage.max value",
+      });
+    }
+  }
+
   // mpptConfig
   if (!Array.isArray(data.mpptConfig) || data.mpptConfig.length === 0) {
     errors.push({
@@ -87,54 +132,6 @@ export const validateInverterData = (req, res, next) => {
   } else {
     data.mpptConfig = data.mpptConfig.map((mpptRaw, index) => {
       const mppt = extractAllowedFields(mpptRaw, MPPT_ALLOWED_FIELDS);
-
-      // startUpVoltage
-      if (!isNonEmpty(mppt.startUpVoltage)) {
-        errors.push({
-          field: `mpptConfig[${index}].startUpVoltage`,
-          message: "startUpVoltage is required",
-        });
-      } else {
-        mppt.startUpVoltage = parseNumber(mppt.startUpVoltage);
-        if (!isPositive(mppt.startUpVoltage)) {
-          errors.push({
-            field: `mpptConfig[${index}].startUpVoltage`,
-            message: "Invalid startUpVoltage value",
-          });
-        }
-      }
-
-      // inputVoltage.min
-      if (!isNonEmpty(mppt.inputVoltage.min)) {
-        errors.push({
-          field: `mpptConfig[${index}].inputVoltage.min`,
-          message: "inputVoltage.min is required",
-        });
-      } else {
-        mppt.inputVoltage.min = parseNumber(mppt.inputVoltage.min);
-        if (!isPositive(mppt.inputVoltage.min)) {
-          errors.push({
-            field: `mpptConfig[${index}].inputVoltage.min`,
-            message: "Invalid inputVoltage.min value",
-          });
-        }
-      }
-
-      // inputVoltage.max
-      if (!isNonEmpty(mppt.inputVoltage.max)) {
-        errors.push({
-          field: `mpptConfig[${index}].inputVoltage.max`,
-          message: "inputVoltage.max is required",
-        });
-      } else {
-        mppt.inputVoltage.max = parseNumber(mppt.inputVoltage.max);
-        if (!isPositive(mppt.inputVoltage.max)) {
-          errors.push({
-            field: `mpptConfig[${index}].inputVoltage.max`,
-            message: "Invalid inputVoltage.max value",
-          });
-        }
-      }
 
       // maxInputCurrent
       if (!isNonEmpty(mppt.maxInputCurrent)) {
@@ -152,18 +149,18 @@ export const validateInverterData = (req, res, next) => {
         }
       }
 
-      // numOfStrings
-      if (!isNonEmpty(mppt.numOfStrings)) {
+      // stringCount
+      if (!isNonEmpty(mppt.stringCount)) {
         errors.push({
-          field: `mpptConfig[${index}].numOfStrings`,
-          message: "numOfStrings is required",
+          field: `mpptConfig[${index}].stringCount`,
+          message: "stringCount is required",
         });
       } else {
-        mppt.numOfStrings = parseInt(mppt.numOfStrings, 10);
-        if (!isPositive(mppt.numOfStrings)) {
+        mppt.stringCount = parseInt(mppt.stringCount, 10);
+        if (!isPositive(mppt.stringCount)) {
           errors.push({
-            field: `mpptConfig[${index}].numOfStrings`,
-            message: "Invalid numOfStrings value",
+            field: `mpptConfig[${index}].stringCount`,
+            message: "Invalid stringCount value",
           });
         }
       }
@@ -188,18 +185,18 @@ export const validateInverterData = (req, res, next) => {
     }
   }
 
-  // maxOutputVoltage
-  if (!isNonEmpty(data.maxOutputVoltage)) {
+  // nominalVoltage
+  if (!isNonEmpty(data.nominalVoltage)) {
     errors.push({
-      field: "maxOutputVoltage",
-      message: "maxOutputVoltage is required",
+      field: "nominalVoltage",
+      message: "nominalVoltage is required",
     });
   } else {
-    data.maxOutputVoltage = parseNumber(data.maxOutputVoltage);
-    if (!isPositive(data.maxOutputVoltage)) {
+    data.nominalVoltage = parseNumber(data.nominalVoltage);
+    if (!isPositive(data.nominalVoltage)) {
       errors.push({
-        field: "maxOutputVoltage",
-        message: "Invalid maxOutputVoltage value",
+        field: "nominalVoltage",
+        message: "Invalid nominalVoltage value",
       });
     }
   }

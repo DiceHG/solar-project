@@ -6,13 +6,8 @@ import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 const mpptSchema = z.object({
-  startUpVoltage: z.coerce.number().positive(),
-  inputVoltage: z.object({
-    min: z.coerce.number().positive(),
-    max: z.coerce.number().positive(),
-  }),
   maxInputCurrent: z.coerce.number().positive(),
-  numOfStrings: z.coerce.number().int().default(1),
+  stringCount: z.coerce.number().int().default(1),
 });
 
 const inverterSchema = z.object({
@@ -23,11 +18,16 @@ const inverterSchema = z.object({
 
   // Input DC
   maxInputPower: z.coerce.number().positive(), // kW (DC)
+  startUpVoltage: z.coerce.number().positive(),
+  inputVoltage: z.object({
+    min: z.coerce.number().positive(),
+    max: z.coerce.number().positive(),
+  }),
   mpptConfig: z.array(mpptSchema).min(1),
 
   // Output AC
   maxOutputPower: z.coerce.number().min(0), // kW (AC)
-  maxOutputVoltage: z.coerce.number().min(0).default(220), // V (AC)
+  nominalVoltage: z.coerce.number().min(0).default(220), // V (AC)
   maxOutputCurrent: z.coerce.number().min(0), // A (AC)
   phaseType: z.enum(["single-phase", "three-phase"]).default("single-phase"),
   frequency: z.coerce.number().min(0).default(60), // Hz
@@ -35,13 +35,8 @@ const inverterSchema = z.object({
 });
 
 const defaultMppt = () => ({
-  startUpVoltage: "",
-  inputVoltage: {
-    min: "",
-    max: "",
-  },
-  maxCurrent: "",
-  numOfStrings: 1,
+  maxInputCurrent: "",
+  stringCount: 1,
 });
 
 const InverterForm = ({ mode = "create" }) => {
@@ -64,7 +59,7 @@ const InverterForm = ({ mode = "create" }) => {
       maxInputPower: "",
       mpptConfig: [defaultMppt()],
       maxOutputPower: "",
-      maxOutputVoltage: 220,
+      nominalVoltage: 220,
       maxOutputCurrent: "",
       phaseType: "single-phase",
       frequency: 60,
@@ -90,8 +85,11 @@ const InverterForm = ({ mode = "create" }) => {
   const onSubmit = async (data) => {
     try {
       if (mode === "create") {
-        console.log(data);
-        await axios.post("http://localhost:5000/api/inverters", data);
+        await axios
+          .post("http://localhost:5000/api/inverters", data)
+          .then((res) => {
+            console.log(res.data);
+          });
       } else if (mode === "edit") {
         await axios.put(
           `http://localhost:5000/api/inverters/${initialData._id}`,
@@ -117,15 +115,12 @@ const InverterForm = ({ mode = "create" }) => {
         <label htmlFor="model">Modelo</label>
         <input {...register("model")} id="model" />
         <p>{errors.model?.message}</p>
-
         <label htmlFor="maker">Fabricante</label>
         <input {...register("maker")} id="maker" />
         <p>{errors.maker?.message}</p>
-
         <label htmlFor="inmetro">Inmetro</label>
         <input {...register("inmetro")} id="inmetro" />
         <p>{errors.inmetro?.message}</p>
-
         <label htmlFor="maxInputPower">Máxima Potência de Entrada</label>
         <input
           type="number"
@@ -134,7 +129,30 @@ const InverterForm = ({ mode = "create" }) => {
           inputMode="numeric"
         />
         <p>{errors.maxInputPower?.message}</p>
-
+        <label htmlFor={`startUpVoltage`}>Tensão de Partida (V)</label>
+        <input
+          id={`startUpVoltage`}
+          type="number"
+          inputMode="numeric"
+          {...register(`startUpVoltage`)}
+        />
+        <p>{errors.startUpVoltage?.message}</p>
+        <label htmlFor={`inputVoltage.min`}>Tensão Mínima (V)</label>
+        <input
+          id={`inputVoltage.min`}
+          type="number"
+          inputMode="numeric"
+          {...register(`inputVoltage.min`)}
+        />
+        <p>{errors.inputVoltage?.min?.message}</p>
+        <label htmlFor={`inputVoltage.max`}>Tensão Máxima (V)</label>
+        <input
+          id={`inputVoltage.max`}
+          type="number"
+          inputMode="numeric"
+          {...register(`inputVoltage.max`)}
+        />
+        <p>{errors.inputVoltage?.max?.message}</p>
         {fields.map((f, i) => (
           <fieldset key={f.id}>
             <legend>MPPT {i + 1}</legend>
@@ -145,38 +163,7 @@ const InverterForm = ({ mode = "create" }) => {
             >
               Remover
             </button>
-            <label htmlFor={`mpptConfig.${i}.startUpVoltage`}>
-              Tensão de Partida (V)
-            </label>
-            <input
-              id={`mpptConfig.${i}.startUpVoltage`}
-              type="number"
-              inputMode="numeric"
-              {...register(`mpptConfig.${i}.startUpVoltage`)}
-            />
-            <p>{errors.mpptConfig?.[i]?.startUpVoltage?.message}</p>
-
-            <label htmlFor={`mpptConfig.${i}.inputVoltage.min`}>
-              Tensão Mínima (V)
-            </label>
-            <input
-              id={`mpptConfig.${i}.inputVoltage.min`}
-              type="number"
-              inputMode="numeric"
-              {...register(`mpptConfig.${i}.inputVoltage.min`)}
-            />
-            <p>{errors.mpptConfig?.[i]?.inputVoltage?.min?.message}</p>
-
-            <label htmlFor={`mpptConfig.${i}.inputVoltage.max`}>
-              Tensão Máxima (V)
-            </label>
-            <input
-              id={`mpptConfig.${i}.inputVoltage.max`}
-              type="number"
-              inputMode="numeric"
-              {...register(`mpptConfig.${i}.inputVoltage.max`)}
-            />
-            <p>{errors.mpptConfig?.[i]?.inputVoltage?.max?.message}</p>
+            <br />
 
             <label htmlFor={`mpptConfig.${i}.maxInputCurrent`}>
               Corrente Máxima (A)
@@ -189,23 +176,22 @@ const InverterForm = ({ mode = "create" }) => {
             />
             <p>{errors.mpptConfig?.[i]?.maxInputCurrent?.message}</p>
 
-            <label htmlFor={`mpptConfig.${i}.numOfStrings`}>
+            <label htmlFor={`mpptConfig.${i}.stringCount`}>
               Número de Strings
             </label>
             <input
-              id={`mpptConfig.${i}.numOfStrings`}
+              id={`mpptConfig.${i}.stringCount`}
               type="number"
               inputMode="numeric"
-              {...register(`mpptConfig.${i}.numOfStrings`)}
+              {...register(`mpptConfig.${i}.stringCount`)}
             />
-            <p>{errors.mpptConfig?.[i]?.numOfStrings?.message}</p>
+            <p>{errors.mpptConfig?.[i]?.stringCount?.message}</p>
           </fieldset>
         ))}
-
         <button type="button" onClick={() => append(defaultMppt())}>
           + Adicionar MPPT
-        </button>
-
+        </button>{" "}
+        <br />
         <label htmlFor="maxOutputPower">Máxima Potência de Saída</label>
         <input
           type="number"
@@ -214,16 +200,14 @@ const InverterForm = ({ mode = "create" }) => {
           inputMode="numeric"
         />
         <p>{errors.maxOutputPower?.message}</p>
-
-        <label htmlFor="maxOutputVoltage">Máxima Tensão de Saída</label>
+        <label htmlFor="nominalVoltage">Máxima Tensão de Saída</label>
         <input
           type="number"
-          {...register("maxOutputVoltage")}
-          id="maxOutputVoltage"
+          {...register("nominalVoltage")}
+          id="nominalVoltage"
           inputMode="numeric"
         />
-        <p>{errors.maxOutputVoltage?.message}</p>
-
+        <p>{errors.nominalVoltage?.message}</p>
         <label htmlFor="maxOutputCurrent">Máxima Corrente de Saída</label>
         <input
           type="number"
@@ -232,14 +216,12 @@ const InverterForm = ({ mode = "create" }) => {
           inputMode="numeric"
         />
         <p>{errors.maxOutputCurrent?.message}</p>
-
         <label htmlFor="phaseType">Tipo de Fase</label>
         <select {...register("phaseType")} id="phaseType">
           <option value="single-phase">Monofásico</option>
           <option value="three-phase">Trifásico</option>
         </select>
         <p>{errors.phaseType?.message}</p>
-
         <label htmlFor="frequency">Frequência (Hz)</label>
         <input
           type="number"
@@ -248,7 +230,6 @@ const InverterForm = ({ mode = "create" }) => {
           inputMode="numeric"
         />
         <p>{errors.frequency?.message}</p>
-
         <label htmlFor="efficiency">Eficiência (%)</label>
         <input
           type="number"
@@ -257,7 +238,6 @@ const InverterForm = ({ mode = "create" }) => {
           inputMode="numeric"
         />
         <p>{errors.efficiency?.message}</p>
-
         <label htmlFor="datasheetUrl">URL do Datasheet</label>
         <input
           type="file"
@@ -266,7 +246,6 @@ const InverterForm = ({ mode = "create" }) => {
           accept=".pdf"
         />
         <p>{errors.datasheetUrl?.message}</p>
-
         <button type="submit">Cadastrar</button>
       </form>
     </>

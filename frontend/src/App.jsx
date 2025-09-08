@@ -19,6 +19,10 @@ const App = () => {
       <Route path="equipments">
         <Route index element={<EquipmentCatalog />} />
         <Route path="inverter/form" element={<InverterForm mode="create" />} />
+        <Route
+          path="inverter/edit/:id"
+          element={<InverterForm mode="edit" />}
+        />
       </Route>
 
       <Route path="concerts">

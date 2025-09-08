@@ -2,9 +2,15 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router";
 import axios from "axios";
 
+import InverterPage from "./InverterPage";
+// import ModulePage from "./ModulePage";
+import Modal from "../components/Modal";
+
 const EquipmentCatalog = () => {
   const [inverters, setInverters] = useState([]);
   const [modules, setModules] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedEquipment, setSelectedEquipment] = useState(null);
 
   useEffect(() => {
     const fetchInverters = async () => {
@@ -29,45 +35,94 @@ const EquipmentCatalog = () => {
     // fetchModules();
   }, []);
 
-  const openModal = (inverter) => {
-    alert(
-      `Modelo: ${inverter.model}\nFabricante: ${inverter.maker}\nPotência Máxima de Saída: ${inverter.maxOutputPower} kW`
-    );
+  const openModal = (type, equipment) => {
+    setIsModalOpen(true);
+    setSelectedEquipment({ type, equipment });
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedEquipment(null);
+  };
+
+  const handleDelete = (id, type) => {
+    if (type === "inverter") {
+      setInverters((prev) => prev.filter((inv) => inv._id !== id));
+    } else if (type === "module") {
+      setModules((prev) => prev.filter((mod) => mod._id !== id));
+    }
+    closeModal();
   };
 
   return (
-    <div>
-      <h1>Equipamentos</h1>
-      <Link to="/equipments/inverter/form">Novo Inversor</Link>
-      {
-        // TO DO LATER: Add modules back
-        /* <h2>Módulos</h2>
-      <ul>
-        {modules.map((module) => (
-          <li key={module._id}>{module.model}</li>
-        ))}
-      </ul> */
-      }
-      <h2>Inversores</h2>
-      <table>
+    <>
+      <Link to="/">Home</Link>
+      {isModalOpen && (
+        <Modal closeModal={closeModal}>
+          {selectedEquipment.type === "inverter" ? (
+            <InverterPage
+              inverterId={selectedEquipment.equipment._id}
+              onDelete={handleDelete}
+            />
+          ) : (
+            // <ModulePage module={selectedEquipment.equipment} />
+            <div>Module details coming soon...</div>
+          )}
+        </Modal>
+      )}
+      <div>
+        <h1>Equipamentos</h1>
+
+        {/* TO DO: Add back modules */}
+
+        {/* <h2>Módulos</h2>
+        <table>
         <thead>
-          <tr>
-            <th>Modelo</th>
-            <th>Fabricante</th>
-            <th>Potência (kW)</th>
-          </tr>
+        <tr>
+        <th>Modelo</th>
+        <th>Fabricante</th>
+        <th>Potência (kW)</th>
+        </tr>
         </thead>
         <tbody>
-          {inverters.map((inverter) => (
-            <tr key={inverter._id} onClick={() => openModal(inverter)}>
-              <td>{inverter.model}</td>
-              <td>{inverter.maker}</td>
-              <td>{inverter.maxOutputPower}</td>
-            </tr>
+        {modules.map((module) => (
+          <tr
+          key={module._id}
+          onClick={() => openModal("module", module)}
+          >
+          <td>{module.model}</td>
+          <td>{module.maker}</td>
+          <td>{module.maxOutputPower}</td>
+          </tr>
           ))}
-        </tbody>
-      </table>
-    </div>
+          </tbody>
+          </table> */}
+
+        <h2>Inversores</h2>
+        <Link to="/equipments/inverter/form">Novo Inversor</Link>
+        <table>
+          <thead>
+            <tr>
+              <th>Modelo</th>
+              <th>Fabricante</th>
+              <th>Potência (kW)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {inverters.map((inverter) => (
+              <tr
+                key={inverter._id}
+                onClick={() => openModal("inverter", inverter)}
+              >
+                <td>{inverter.model}</td>
+                <td>{inverter.maker}</td>
+                <td>{inverter.maxOutputPower}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 };
 

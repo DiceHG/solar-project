@@ -3,13 +3,8 @@ import mongoose, { Schema } from "mongoose";
 
 const mpptSchema = new Schema(
   {
-    startUpVoltage: { type: Number, required: true },
-    inputVoltage: {
-      min: { type: Number, required: true },
-      max: { type: Number, required: true },
-    },
     maxInputCurrent: { type: Number, required: true, min: 0 },
-    numOfStrings: { type: Number, required: true, min: 1, default: 1 },
+    stringCount: { type: Number, required: true, min: 1, default: 1 },
   },
   { _id: false }
 );
@@ -24,11 +19,16 @@ const inverterSchema = new Schema(
 
     // Input DC
     maxInputPower: { type: Number, min: 0, required: true }, // kW (DC)
+    startUpVoltage: { type: Number, required: true },
+    inputVoltage: {
+      min: { type: Number, required: true },
+      max: { type: Number, required: true },
+    },
     mpptConfig: { type: [mpptSchema], required: true },
 
     // Output AC
     maxOutputPower: { type: Number, required: true, min: 0 }, // kW (AC)
-    maxOutputVoltage: { type: Number, required: true, default: 220 }, // V (AC)
+    nominalVoltage: { type: Number, required: true, default: 220 }, // V (AC)
     maxOutputCurrent: { type: Number, min: 0, required: true }, // A (AC)
     phaseType: {
       type: String,
