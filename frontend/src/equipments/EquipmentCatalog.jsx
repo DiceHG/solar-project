@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import axios from "axios";
 
 import InverterPage from "./InverterPage";
-// import ModulePage from "./ModulePage";
+import ModulePage from "./ModulePage";
 import Modal from "../components/Modal";
 
 const EquipmentCatalog = () => {
@@ -22,17 +22,17 @@ const EquipmentCatalog = () => {
       }
     };
 
-    // const fetchModules = async () => {
-    //   try {
-    //     const res = await axios.get("http://localhost:5000/api/modules");
-    //     setModules(res.data.data);
-    //   } catch (error) {
-    //     console.error("Error fetching modules:", error);
-    //   }
-    // };
+    const fetchModules = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/modules");
+        setModules(res.data.data);
+      } catch (error) {
+        console.error("Error fetching modules:", error);
+      }
+    };
 
     fetchInverters();
-    // fetchModules();
+    fetchModules();
   }, []);
 
   const openModal = (type, equipment) => {
@@ -65,38 +65,36 @@ const EquipmentCatalog = () => {
               onDelete={handleDelete}
             />
           ) : (
-            // <ModulePage module={selectedEquipment.equipment} />
-            <div>Module details coming soon...</div>
+            <ModulePage
+              moduleId={selectedEquipment.equipment._id}
+              onDelete={handleDelete}
+            />
           )}
         </Modal>
       )}
       <div>
         <h1>Equipamentos</h1>
 
-        {/* TO DO: Add back modules */}
-
-        {/* <h2>Módulos</h2>
+        <h2>Módulos</h2>
+        <Link to="/equipments/module/form">Novo Módulo</Link>
         <table>
-        <thead>
-        <tr>
-        <th>Modelo</th>
-        <th>Fabricante</th>
-        <th>Potência (kW)</th>
-        </tr>
-        </thead>
-        <tbody>
-        {modules.map((module) => (
-          <tr
-          key={module._id}
-          onClick={() => openModal("module", module)}
-          >
-          <td>{module.model}</td>
-          <td>{module.maker}</td>
-          <td>{module.maxOutputPower}</td>
-          </tr>
-          ))}
+          <thead>
+            <tr>
+              <th>Modelo</th>
+              <th>Fabricante</th>
+              <th>Potência (kW)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {modules.map((module) => (
+              <tr key={module._id} onClick={() => openModal("module", module)}>
+                <td>{module.model}</td>
+                <td>{module.maker}</td>
+                <td>{module.maxPower}</td>
+              </tr>
+            ))}
           </tbody>
-          </table> */}
+        </table>
 
         <h2>Inversores</h2>
         <Link to="/equipments/inverter/form">Novo Inversor</Link>

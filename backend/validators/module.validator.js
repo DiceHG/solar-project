@@ -1,9 +1,10 @@
 // validators/module.validator.js
 import {
   extractAllowedFields,
+  parseString,
+  parseNumber,
   isNonEmpty,
   isPositive,
-  parseNumber,
 } from "../utils/helpers.js";
 
 const ALLOWED_FIELDS = [
@@ -16,8 +17,6 @@ const ALLOWED_FIELDS = [
   "maxPower",
   "maxVoltage",
   "maxCurrent",
-  "maxSystemVoltage",
-  "maxSeriesFuse",
 ];
 
 export const validateModuleData = (req, res, next) => {

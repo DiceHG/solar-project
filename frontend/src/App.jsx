@@ -2,9 +2,11 @@ import { Routes, Route } from "react-router";
 import ClientForm from "./clients/ClientForm";
 import ClientList from "./clients/ClientList";
 import ClientPage from "./clients/ClientPage";
-import InverterForm from "./equipments/InverterForm";
 import EquipmentCatalog from "./equipments/EquipmentCatalog";
+import InverterForm from "./equipments/InverterForm";
+import ModuleForm from "./equipments/ModuleForm";
 import Index from "./Index";
+
 const App = () => {
   return (
     <Routes>
@@ -23,6 +25,8 @@ const App = () => {
           path="inverter/edit/:id"
           element={<InverterForm mode="edit" />}
         />
+        <Route path="module/form" element={<ModuleForm mode="create" />} />
+        <Route path="module/edit/:id" element={<ModuleForm mode="edit" />} />
       </Route>
 
       <Route path="concerts">

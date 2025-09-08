@@ -83,19 +83,17 @@ const InverterForm = ({ mode = "create" }) => {
   }, [mode, id, reset]);
 
   const onSubmit = async (data) => {
+    let res;
     try {
       if (mode === "create") {
-        await axios
-          .post("http://localhost:5000/api/inverters", data)
-          .then((res) => {
-            console.log(res.data);
-          });
+        res = await axios.post("http://localhost:5000/api/inverters", data);
       } else if (mode === "edit") {
-        await axios.put(
+        res = await axios.put(
           `http://localhost:5000/api/inverters/${initialData._id}`,
           data
         );
       }
+      console.log(res.data);
       navigate(`/equipments`, { replace: true });
     } catch (err) {
       console.error(err.response.data);
@@ -163,6 +161,7 @@ const InverterForm = ({ mode = "create" }) => {
             >
               Remover
             </button>
+
             <br />
 
             <label htmlFor={`mpptConfig.${i}.maxInputCurrent`}>

@@ -15,7 +15,9 @@ const InverterPage = ({ inverterId, onDelete }) => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/inverters/${id}`);
+      await axios
+        .delete(`http://localhost:5000/api/inverters/${id}`)
+        .then((res) => console.log(res.data));
       onDelete(id, "inverter");
     } catch (error) {
       console.error("Error deleting inverter:", error);
@@ -33,7 +35,9 @@ const InverterPage = ({ inverterId, onDelete }) => {
       <Link to={`/equipments/inverter/edit/${inverter._id}`}>
         <button>Editar</button>
       </Link>
-      <button onClick={() => handleDelete(inverter._id)}>Excluir</button>
+      <button onClick={() => handleDelete(inverter._id, "inverter")}>
+        Excluir
+      </button>
       <h2>
         Dados Técnicos: {inverter.model} - {inverter.maker}
       </h2>
