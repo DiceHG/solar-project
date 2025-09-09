@@ -5,7 +5,7 @@ import ModuleModel from "../models/module.model.js";
 
 export const getModules = async (req, res, next) => {
   try {
-    const modules = await ModuleModel.find().select("maker model price dimensions").lean();
+    const modules = await ModuleModel.find().select("maker model price dimensions maxPower").lean();
     if (modules.length === 0) {
       return res.status(200).json({ success: true, data: [], message: "Nenhum módulo encontrado" });
     }
