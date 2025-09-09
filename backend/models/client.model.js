@@ -1,40 +1,22 @@
-// models/client.model.js
+// src/models/client.model.js
 import mongoose, { Schema } from "mongoose";
 
 const clientSchema = new Schema(
   {
-    clientType: {
-      type: String,
-      enum: ["individual", "company"],
-      default: "individual",
-      required: true,
-    },
-    name: { type: String, required: true, trim: true },
-    docNumber: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    email: { type: String, required: true, trim: true, lowercase: true },
-    phoneNumber: { type: String, required: true, trim: true },
-    projects: [{ type: Schema.Types.ObjectId, ref: "Project" }],
-    dateOfBirth: { type: Date, alias: "creationDate", trim: true },
+    entityType: { type: String, enum: ["individual", "company"], required: true, default: "individual" },
+    name: { type: String, required: true, trim: true, minlength: 1 },
+    docNumber: { type: String, required: true, trim: true },
+    email: { type: String, trim: true, lowercase: true },
+    phoneNumber: { type: String, trim: true },
+    originDate: { type: Date },
+    projects: { type: [{ type: Schema.Types.ObjectId, ref: "Project" }], default: [] },
   },
   {
     timestamps: true,
-    toJSON: {
-      virtuals: true,
-      versionKey: false,
-      transform: (_doc, ret) => {
-        ret.id = ret._id;
-        delete ret._id;
-      },
-    },
-    toObject: { virtuals: true },
+    versionKey: false,
   }
 );
 
-const ClientModel =
-  mongoose.models.Client || mongoose.model("Client", clientSchema);
+const ClientModel = mongoose.models.Client || mongoose.model("Client", clientSchema);
 
 export default ClientModel;

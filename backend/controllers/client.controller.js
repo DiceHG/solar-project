@@ -2,16 +2,18 @@
 import mongoose from "mongoose";
 
 import ClientModel from "../models/client.model.js";
+import ProjectModel from "../models/project.model.js";
+// import LocationModel from "../models/location.model.js";
 
-// Get all clients data
-// GET api/clients
+// GET /api/clients
 export const getClients = async (req, res, next) => {
   try {
-    const clients = await ClientModel.find({}).lean();
+    const clients = await ClientModel.find()
+      .select("_id name phoneNumber createdAt")
+      .sort({ createdAt: -1 })
+      .lean();
     if (clients.length === 0) {
-      return res
-        .status(200)
-        .json({ success: true, data: [], message: "No clients found." });
+      return res.status(200).json({ success: true, data: [], message: "Nenhum cliente encontrado" });
     }
     res.status(200).json({ success: true, data: clients });
   } catch (err) {
@@ -20,23 +22,15 @@ export const getClients = async (req, res, next) => {
   }
 };
 
-// Get client data by ID
 // GET api/clients/:id
 export const getClientById = async (req, res, next) => {
   const { id } = req.params;
-
   if (!mongoose.isValidObjectId(id)) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Invalid ID format." });
+    return res.status(400).json({ success: false, message: "ID de cliente inválido" });
   }
-
   try {
     const client = await ClientModel.findById(id).lean();
-    if (!client)
-      return res
-        .status(404)
-        .json({ success: false, message: "Client not found." });
+    if (!client) return res.status(404).json({ success: false, message: "Cliente não encontrado" });
     res.status(200).json({ success: true, data: client });
   } catch (err) {
     console.error(`Error in getting client ${err}`);
@@ -44,20 +38,14 @@ export const getClientById = async (req, res, next) => {
   }
 };
 
-// Creates a new client
 // POST api/clients
 export const createClient = async (req, res, next) => {
-  const payload = { ...req.validatedData, projects: [] };
-
+  const payload = { ...req.validatedData };
   try {
     if (payload.docNumber) {
-      const docExist = await ClientModel.findOne({
-        docNumber: payload.docNumber,
-      }).lean();
+      const docExist = await ClientModel.findOne({ docNumber: payload.docNumber }).lean();
       if (docExist) {
-        return res
-          .status(409)
-          .json({ success: false, message: "Client already registered." });
+        return res.status(409).json({ success: false, message: "Cliente já registrado" });
       }
     }
     const newClient = await ClientModel.create(payload);
@@ -68,65 +56,68 @@ export const createClient = async (req, res, next) => {
   }
 };
 
-// Updates an existing client
 // PUT api/clients/:id
 export const updateClient = async (req, res, next) => {
   const { id } = req.params;
   const payload = { ...req.validatedData };
-
   if (!mongoose.isValidObjectId(id)) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Invalid ID format." });
+    return res.status(400).json({ success: false, message: "ID de cliente inválido" });
   }
-
   try {
-    const updatedClient = await ClientModel.findByIdAndUpdate(
-      id,
-      { $set: payload },
-      {
-        new: true,
-        runValidators: true,
-        context: "query",
-      }
-    ).lean();
+    const updatedClient = await ClientModel.findByIdAndUpdate(id, payload, { new: true }).lean();
     if (!updatedClient) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Client not found" });
+      return res.status(404).json({ success: false, message: "Cliente não encontrado" });
     }
-    res.status(200).json({
-      success: true,
-      data: updatedClient,
-      message: "Client Updated Successfully",
-    });
+    res.status(200).json({ success: true, data: updatedClient, message: "Cliente Atualizado com Sucesso" });
   } catch (err) {
     console.error(`Error in updating client ${err}`);
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
 
-// Deletes a client
 // DELETE api/clients/:id
 export const deleteClient = async (req, res) => {
   const { id } = req.params;
-
   if (!mongoose.isValidObjectId(id)) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Invalid ID format." });
+    return res.status(400).json({ success: false, message: "ID de cliente inválido" });
   }
 
+  const session = await mongoose.startSession();
+  let deleted = { projects: 0, locations: 0 };
+
   try {
-    const deletedClient = await ClientModel.findByIdAndDelete(id).lean();
-    if (!deletedClient) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Client not found" });
-    }
-    res.status(200).json({ success: true, message: "Client deleted" });
+    await session.withTransaction(async () => {
+      // 1) Delete the client and capture its projects
+      const deletedClient = await ClientModel.findByIdAndDelete(id).session(session).lean();
+
+      if (!deletedClient) throw new Error("Cliente não encontrado");
+
+      // 2) Grab project IDs
+      const projectIds = deletedClient.projects;
+
+      if (projectIds.length) {
+        // 3) Delete projects
+        const projRes = await ProjectModel.deleteMany({ _id: { $in: projectIds } }).session(session);
+        deleted.projects = projRes.deletedCount ?? 0;
+
+        // 4) Delete
+        // const locRes = await LocationModel.deleteMany({ project: { $in: projectIds } }).session(session);
+        // deleted.locations = locRes.deletedCount ?? 0;
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Cliente Excluído com Sucesso",
+      deleted,
+    });
   } catch (err) {
-    console.error(`Error in deleting client ${err}`);
-    res.status(500).json({ success: false, message: "Server Error" });
+    if (err.message === "Cliente não encontrado") {
+      return res.status(404).json({ success: false, message: "Cliente não encontrado" });
+    }
+    console.error("Error deleting client:", err);
+    return res.status(500).json({ success: false, message: "Server Error" });
+  } finally {
+    await session.endSession();
   }
 };

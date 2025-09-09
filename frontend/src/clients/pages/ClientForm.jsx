@@ -5,14 +5,34 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-const clientSchema = z.object({
-  clientType: z.enum(["individual", "company"]),
-  name: z.string(),
-  docNumber: z.string(),
-  email: z.email(),
-  phoneNumber: z.string(),
-  dateOfBirth: z.iso.date().optional(),
-});
+import { isValidCPF, isValidCNPJ } from "../../shared/utils/br-docs";
+
+const clientSchema = z
+  .object({
+    clientType: z.enum(["individual", "company"]),
+    name: z.string().min(1),
+    docNumber: z.string(),
+    email: z.email(),
+    phoneNumber: z.string().min(10).max(15),
+    dateOfBirth: z.iso.date().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.clientType === "individual" && !isValidCPF(data.docNumber)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["docNumber"],
+        message: "Invalid CPF",
+      });
+    }
+
+    if (data.clientType === "company" && !isValidCNPJ(data.docNumber)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["docNumber"],
+        message: "Invalid CNPJ",
+      });
+    }
+  });
 
 const ClientForm = ({ mode = "create" }) => {
   const [initialData, setInitialData] = useState({});
@@ -67,7 +87,10 @@ const ClientForm = ({ mode = "create" }) => {
   return (
     <>
       <h1>{mode === "create" ? "Cadastrar Cliente" : "Editar Cliente"}</h1>
-      <Link to="/clients">Back to Clients</Link>
+      <Link to="/clients">
+        <button>Voltar</button>
+      </Link>
+      <p>Tipo Cliente</p>
       <form onSubmit={handleSubmit(onSubmit)}>
         <input
           {...register("clientType")}
@@ -75,14 +98,14 @@ const ClientForm = ({ mode = "create" }) => {
           type="radio"
           value="individual"
         />
-        <label htmlFor="individual">Individual</label>
+        <label htmlFor="individual">Física</label>
         <input
           {...register("clientType")}
           id="company"
           type="radio"
           value="company"
         />
-        <label htmlFor="company">Company</label>
+        <label htmlFor="company">Jurídica</label>
         <p>{errors.clientType?.message}</p>
 
         <label htmlFor="name">
@@ -113,7 +136,7 @@ const ClientForm = ({ mode = "create" }) => {
         <input {...register("dateOfBirth")} type="date" id="dateOfBirth" />
         <p>{errors.dateOfBirth?.message}</p>
 
-        <button type="submit">Cadastrar</button>
+        <button type="submit">Enviar</button>
       </form>
     </>
   );

@@ -7,14 +7,15 @@ import {
   getClients,
   updateClient,
 } from "../controllers/client.controller.js";
-import { validateClientData } from "../validators/client.validator.js";
+import { validate } from "../middleware/validate.js";
+import { clientSchema } from "../schemas/client.schema.js";
 
 const router = express.Router();
 
 router.get("/", getClients);
 router.get("/:id", getClientById);
-router.post("/", validateClientData, createClient);
-router.put("/:id", validateClientData, updateClient);
+router.post("/", validate(clientSchema), createClient);
+router.put("/:id", validate(clientSchema), updateClient);
 router.delete("/:id", deleteClient);
 
 export default router;

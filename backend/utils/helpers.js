@@ -1,24 +1,8 @@
 // utils/helpers.js
-// Extract allowed fields from an object
-export const extractAllowedFields = (obj, allowedFields) => {
-  const out = {};
-  if (!obj || typeof obj !== "object") return out;
-  for (const field of allowedFields) {
-    if (obj[field] !== undefined) {
-      out[field] = obj[field];
-    }
-  }
-  return out;
-};
-
 // String parsing utility
 export const parseString = (s) => {
   if (typeof s === "string") return s.trim();
-  if (
-    typeof s === "number" ||
-    typeof s === "boolean" ||
-    typeof s === "bigint"
-  ) {
+  if (typeof s === "number" || typeof s === "boolean" || typeof s === "bigint") {
     return String(s).trim();
   }
   return "";

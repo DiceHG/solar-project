@@ -69,7 +69,9 @@ const ModuleForm = ({ mode = "create" }) => {
   return (
     <>
       <h1>{mode === "create" ? "Cadastrar Módulo" : "Editar Módulo"}</h1>
-      <Link to="/equipments">Voltar</Link>
+      <Link to="/equipments">
+        <button>Voltar</button>
+      </Link>
       <form onSubmit={handleSubmit(onSubmit)}>
         <label htmlFor="model">Modelo</label>
         <input {...register("model")} id="model" />

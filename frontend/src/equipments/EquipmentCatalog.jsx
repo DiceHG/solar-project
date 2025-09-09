@@ -4,7 +4,7 @@ import axios from "axios";
 
 import InverterPage from "./InverterPage";
 import ModulePage from "./ModulePage";
-import Modal from "../components/Modal";
+import Modal from "../shared/components/Modal";
 
 const EquipmentCatalog = () => {
   const [inverters, setInverters] = useState([]);
@@ -56,7 +56,9 @@ const EquipmentCatalog = () => {
 
   return (
     <>
-      <Link to="/">Home</Link>
+      <Link to="/">
+        <button>Home</button>
+      </Link>
       {isModalOpen && (
         <Modal closeModal={closeModal}>
           {selectedEquipment.type === "inverter" ? (
@@ -76,7 +78,9 @@ const EquipmentCatalog = () => {
         <h1>Equipamentos</h1>
 
         <h2>Módulos</h2>
-        <Link to="/equipments/module/form">Novo Módulo</Link>
+        <Link to="/equipments/module/form">
+          <button>Novo Módulo</button>
+        </Link>
         <table>
           <thead>
             <tr>
@@ -97,7 +101,9 @@ const EquipmentCatalog = () => {
         </table>
 
         <h2>Inversores</h2>
-        <Link to="/equipments/inverter/form">Novo Inversor</Link>
+        <Link to="/equipments/inverter/form">
+          <button>Novo Inversor</button>
+        </Link>
         <table>
           <thead>
             <tr>

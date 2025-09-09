@@ -7,6 +7,7 @@ import { connectDB } from "./config/db.js";
 import clientRoute from "./routes/client.route.js";
 import inverterRoute from "./routes/inverter.route.js";
 import moduleRoute from "./routes/module.route.js";
+import projectRoute from "./routes/project.route.js";
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use("/api/clients", clientRoute);
 app.use("/api/inverters", inverterRoute);
 app.use("/api/modules", moduleRoute);
+app.use("/api/projects", projectRoute);
 
 connectDB().then(() => {
   app.listen(PORT, (err) => {

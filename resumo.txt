@@ -1,0 +1,39 @@
+Models
+
+Client {
+  model: {
+    clientType
+    name
+    docNumber
+    email
+    phoneNumber
+    projects
+    dateOfBirth
+  }
+  validation: {
+    clientType: must be one of these 2 ["individual", "company"]
+    name: (len > 0)
+    docNumber: (isValidCPF / isValidCNPJ)
+    email: (regex for email)
+    phoneNumber: (10 <= len <= 15)
+    projects: isValidId from mongoose
+    dateOfBirth: (DateISO -> 01-01-2025)
+  }
+  creating: {
+    post request to "/api/clients" with the necessary information
+  }
+  reading: {
+    get request to "/api/clients" returns all clients
+    get request to "/api/clients/:id" returns one client
+  }
+  updating: {
+    put request to "/api/clients/:id" overwrites with the new information
+  }
+  delete: {
+    delete request to "/api/clients/:id" deletes client with all the projects and locations
+  }
+
+
+  
+}
+
