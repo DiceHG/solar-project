@@ -17,6 +17,8 @@ const clientSchema = new Schema(
   }
 );
 
+moduleSchema.index({ docNumber: 1 }, { unique: true });
+
 const ClientModel = mongoose.models.Client || mongoose.model("Client", clientSchema);
 
 export default ClientModel;

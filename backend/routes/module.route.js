@@ -7,14 +7,15 @@ import {
   getModules,
   updateModule,
 } from "../controllers/module.controller.js";
-import { validateModuleData } from "../validators/module.validator.js";
+import { validate } from "../middleware/validate.js";
+import { moduleSchema } from "../schemas/module.schema.js";
 
 const router = express.Router();
 
 router.get("/", getModules);
 router.get("/:id", getModuleById);
-router.post("/", validateModuleData, createModule);
-router.put("/:id", validateModuleData, updateModule);
+router.post("/", validate(moduleSchema), createModule);
+router.put("/:id", validate(moduleSchema), updateModule);
 router.delete("/:id", deleteModule);
 
 export default router;

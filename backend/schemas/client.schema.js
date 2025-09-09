@@ -13,7 +13,6 @@ export const clientSchema = z
     originDate: z.coerce.date().optional(),
     projects: z.array(z.string()).default([]),
   })
-  .strict()
   .superRefine((clientObj, ctx) => {
     if (clientObj.entityType === "individual" && !isValidCPF(clientObj.docNumber)) {
       ctx.addIssue({ code: "custom", path: ["docNumber"], message: "Invalid CPF" });

@@ -42,15 +42,16 @@ export const getClientById = async (req, res, next) => {
 export const createClient = async (req, res, next) => {
   const payload = { ...req.validatedData };
   try {
-    if (payload.docNumber) {
-      const docExist = await ClientModel.findOne({ docNumber: payload.docNumber }).lean();
-      if (docExist) {
-        return res.status(409).json({ success: false, message: "Cliente já registrado" });
-      }
+    const clientExist = await ClientModel.findOne({ docNumber: payload.docNumber }).lean();
+    if (clientExist) {
+      return res.status(409).json({ success: false, message: "Cliente já registrado" });
     }
     const newClient = await ClientModel.create(payload);
     res.status(201).json({ success: true, data: newClient });
   } catch (err) {
+    if (err?.code === 11000) {
+      return res.status(409).json({ success: false, message: "Cliente já registrado" });
+    }
     console.error(`Error in creating client ${err}`);
     res.status(500).json({ success: false, message: "Server Error" });
   }
@@ -70,6 +71,9 @@ export const updateClient = async (req, res, next) => {
     }
     res.status(200).json({ success: true, data: updatedClient, message: "Cliente Atualizado com Sucesso" });
   } catch (err) {
+    if (err?.code === 11000) {
+      return res.status(409).json({ success: false, message: "Conflito: valores duplicados" });
+    }
     console.error(`Error in updating client ${err}`);
     res.status(500).json({ success: false, message: "Server Error" });
   }
