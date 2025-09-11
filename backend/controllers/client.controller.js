@@ -9,7 +9,7 @@ import ProjectModel from "../models/project.model.js";
 export const getClients = async (req, res, next) => {
   try {
     const clients = await ClientModel.find()
-      .select("_id name phoneNumber createdAt")
+      .select("_id name phoneNumber email createdAt")
       .sort({ createdAt: -1 })
       .lean();
     if (clients.length === 0) {
@@ -86,13 +86,13 @@ export const deleteClient = async (req, res) => {
     return res.status(400).json({ success: false, message: "ID de cliente inválido" });
   }
 
-  const session = await mongoose.startSession();
+  const sess = await mongoose.startSession();
   let deleted = { projects: 0, locations: 0 };
 
   try {
-    await session.withTransaction(async () => {
+    await sess.withTransaction(async () => {
       // 1) Delete the client and capture its projects
-      const deletedClient = await ClientModel.findByIdAndDelete(id).session(session).lean();
+      const deletedClient = await ClientModel.findByIdAndDelete(id).session(sess).lean();
 
       if (!deletedClient) throw new Error("Cliente não encontrado");
 
@@ -101,7 +101,7 @@ export const deleteClient = async (req, res) => {
 
       if (projectIds.length) {
         // 3) Delete projects
-        const projRes = await ProjectModel.deleteMany({ _id: { $in: projectIds } }).session(session);
+        const projRes = await ProjectModel.deleteMany({ _id: { $in: projectIds } }).session(sess);
         deleted.projects = projRes.deletedCount ?? 0;
 
         // 4) Delete
@@ -122,6 +122,6 @@ export const deleteClient = async (req, res) => {
     console.error("Error deleting client:", err);
     return res.status(500).json({ success: false, message: "Server Error" });
   } finally {
-    await session.endSession();
+    await sess.endSession();
   }
 };

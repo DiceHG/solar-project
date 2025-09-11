@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import axios from "axios";
 
-import "./ClientList.css";
-
 const ClientList = () => {
   const [clients, setClients] = useState([]);
   const navigate = useNavigate();
@@ -30,19 +28,17 @@ const ClientList = () => {
             <th>Nome</th>
             <th>Email</th>
             <th>Telefone</th>
+            <th>Criado em</th>
           </tr>
         </thead>
         <tbody>
           {clients.map((client, index) => (
-            <tr
-              key={client._id}
-              onClick={() => navigate(`/clients/${client._id}`)}
-              className="client-row"
-            >
+            <tr key={client._id} onClick={() => navigate(`/clients/${client._id}`)}>
               <td>{index + 1}</td>
               <td>{client.name}</td>
               <td>{client.email}</td>
               <td>{client.phoneNumber}</td>
+              <td>{client.createdAt.split("T")[0].split("-").reverse().join("/")}</td>
             </tr>
           ))}
         </tbody>

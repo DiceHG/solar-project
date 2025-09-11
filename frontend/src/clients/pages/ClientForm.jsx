@@ -1,41 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import axios from "axios";
 import { useForm } from "react-hook-form";
-import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-import { isValidCPF, isValidCNPJ } from "../../shared/utils/br-docs";
-
-const clientSchema = z
-  .object({
-    clientType: z.enum(["individual", "company"]),
-    name: z.string().min(1),
-    docNumber: z.string(),
-    email: z.email(),
-    phoneNumber: z.string().min(10).max(15),
-    dateOfBirth: z.iso.date().optional(),
-  })
-  .superRefine((data, ctx) => {
-    if (data.clientType === "individual" && !isValidCPF(data.docNumber)) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["docNumber"],
-        message: "Invalid CPF",
-      });
-    }
-
-    if (data.clientType === "company" && !isValidCNPJ(data.docNumber)) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["docNumber"],
-        message: "Invalid CNPJ",
-      });
-    }
-  });
+import { clientSchema } from "../../shared/schemas/client.schema.js";
+import axios from "axios";
 
 const ClientForm = ({ mode = "create" }) => {
-  const [initialData, setInitialData] = useState({});
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -47,21 +17,18 @@ const ClientForm = ({ mode = "create" }) => {
     formState: { errors },
   } = useForm({
     resolver: zodResolver(clientSchema),
-    defaultValues: { clientType: "individual" },
+    defaultValues: { entityType: "individual" },
   });
-  const clientType = watch("clientType");
+  const entityType = watch("entityType");
 
   useEffect(() => {
     if (mode === "edit" && id) {
       (async () => {
         const res = await axios.get(`http://localhost:5000/api/clients/${id}`);
         const client = res.data.data;
-        setInitialData(client);
         reset({
           ...client,
-          dateOfBirth: client.dateOfBirth
-            ? client.dateOfBirth.split("T")[0]
-            : "",
+          originDate: client.originDate ? client.originDate.split("T")[0] : "",
         });
       })();
     }
@@ -69,16 +36,15 @@ const ClientForm = ({ mode = "create" }) => {
 
   const onSubmit = async (data) => {
     try {
+      let res;
       if (mode === "create") {
-        await axios.post("http://localhost:5000/api/clients", data);
+        res = await axios.post("http://localhost:5000/api/clients", data);
         navigate("/clients", { replace: true });
       } else if (mode === "edit") {
-        await axios.put(
-          `http://localhost:5000/api/clients/${initialData._id}`,
-          data
-        );
-        navigate(`/clients/${initialData._id}`, { replace: true });
+        res = await axios.put(`http://localhost:5000/api/clients/${id}`, data);
+        navigate(`/clients/${id}`, { replace: true });
       }
+      console.log(res);
     } catch (err) {
       console.error(err.response.data);
     }
@@ -92,31 +58,17 @@ const ClientForm = ({ mode = "create" }) => {
       </Link>
       <p>Tipo Cliente</p>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <input
-          {...register("clientType")}
-          id="individual"
-          type="radio"
-          value="individual"
-        />
+        <input {...register("entityType")} id="individual" type="radio" value="individual" />
         <label htmlFor="individual">Física</label>
-        <input
-          {...register("clientType")}
-          id="company"
-          type="radio"
-          value="company"
-        />
+        <input {...register("entityType")} id="company" type="radio" value="company" />
         <label htmlFor="company">Jurídica</label>
-        <p>{errors.clientType?.message}</p>
+        <p>{errors.entityType?.message}</p>
 
-        <label htmlFor="name">
-          {clientType === "individual" ? "Nome" : "Razão Social"}
-        </label>
+        <label htmlFor="name">{entityType === "individual" ? "Nome" : "Razão Social"}</label>
         <input {...register("name")} id="name" />
         <p>{errors.name?.message}</p>
 
-        <label htmlFor="docNumber">
-          {clientType === "individual" ? "CPF" : "CNPJ"}
-        </label>
+        <label htmlFor="docNumber">{entityType === "individual" ? "CPF" : "CNPJ"}</label>
         <input {...register("docNumber")} id="docNumber" />
         <p>{errors.docNumber?.message}</p>
 
@@ -128,13 +80,11 @@ const ClientForm = ({ mode = "create" }) => {
         <input {...register("phoneNumber")} id="phoneNumber" />
         <p>{errors.phoneNumber?.message}</p>
 
-        <label htmlFor="dateOfBirth">
-          {clientType === "individual"
-            ? "Data de Nascimento"
-            : "Data de Abertura"}
+        <label htmlFor="originDate">
+          {entityType === "individual" ? "Data de Nascimento" : "Data de Abertura"}
         </label>
-        <input {...register("dateOfBirth")} type="date" id="dateOfBirth" />
-        <p>{errors.dateOfBirth?.message}</p>
+        <input {...register("originDate")} type="date" id="originDate" />
+        <p>{errors.originDate?.message}</p>
 
         <button type="submit">Enviar</button>
       </form>

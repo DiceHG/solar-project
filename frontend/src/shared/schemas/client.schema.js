@@ -1,6 +1,6 @@
 // src/schemas/client.schema.js
 import { z } from "zod";
-import { isValidCPF, isValidCNPJ } from "../utils/br-docs.js";
+import { isValidCPF, isValidCNPJ } from "../utils/br-docs";
 import { filterDigits } from "../utils/helpers.js";
 
 export const clientSchema = z
