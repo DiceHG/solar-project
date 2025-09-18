@@ -2,15 +2,39 @@ import React, { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router";
 import axios from "axios";
 
-import ProjectForm from "../components/ProjectForm";
-import Modal from "../../shared/components/Modal";
+import Modal from "../components/Modal";
+
+const ProjectForm = ({ onClose, clientId }) => {
+  const [projectTitle, setProjectTitle] = useState("");
+
+  const handleChange = (e) => {
+    setProjectTitle(e.target.value);
+  };
+
+  const handleSubmit = async () => {
+    const res = await axios.post("http://localhost:5000/api/projects", {
+      title: projectTitle,
+      client: clientId,
+      status: "draft",
+    });
+    console.log(res.data);
+  };
+
+  return (
+    <div>
+      <button onClick={onClose}>X</button>
+      <label htmlFor="projectTitle">Título do Projeto</label>
+      <input type="text" id="projectTitle" value={projectTitle} onChange={handleChange} />
+      <button onClick={handleSubmit}>Adicionar</button>
+    </div>
+  );
+};
 
 const ClientPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [client, setClient] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
@@ -21,8 +45,6 @@ const ClientPage = () => {
         console.log(res.data.data);
       } catch (err) {
         console.error(err.response.data);
-      } finally {
-        setLoading(false);
       }
     };
     fetchClient();
@@ -37,21 +59,13 @@ const ClientPage = () => {
     }
   };
 
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  if (loading) return <div>Loading…</div>;
+  if (!client) return <div>Loading…</div>;
 
   return (
     <div>
       {isModalOpen && (
-        <Modal closeModal={handleCloseModal}>
-          <ProjectForm client={id} />
+        <Modal onClose={() => setIsModalOpen(false)}>
+          <ProjectForm onClose={() => setIsModalOpen(false)} clientId={id} />
         </Modal>
       )}
       <Link to={`/clients/${id}/edit`}>
@@ -63,13 +77,13 @@ const ClientPage = () => {
         <button>Voltar</button>
       </Link>
       <p>
-        {client.clientType === "individual" ? "CPF" : "CNPJ"}:{" "}
-        {client.docNumber}
+        {client.entityType === "individual" ? "CPF" : "CNPJ"}: {client.docNumber}
       </p>
       <p>Email: {client.email}</p>
       <p>Telefone: {client.phoneNumber}</p>
       <hr />
-      <button onClick={handleOpenModal}>Add Project</button>
+      <button onClick={() => setIsModalOpen(true)}>Add Project</button>
+      <hr />
     </div>
   );
 };

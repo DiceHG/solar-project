@@ -5,9 +5,7 @@ import InverterModel from "../models/inverter.model.js";
 
 export const getInverters = async (req, res, next) => {
   try {
-    const inverters = await InverterModel.find()
-      .select("maker model price acNominalPower connectionType acNominalVoltage")
-      .lean();
+    const inverters = await InverterModel.find().lean();
     if (inverters.length === 0) {
       return res.status(200).json({ success: true, data: [], message: "Nenhum inversor encontrado" });
     }
@@ -28,7 +26,7 @@ export const getInverterById = async (req, res, next) => {
     if (!inverter) return res.status(404).json({ success: false, message: "Inversor não encontrado" });
     res.status(200).json({ success: true, data: inverter });
   } catch (err) {
-    console.error(`Error in getting inverter ${err}`);
+    console.error(`Error in getting inverter by id ${err}`);
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
@@ -36,10 +34,6 @@ export const getInverterById = async (req, res, next) => {
 export const createInverter = async (req, res, next) => {
   const payload = { ...req.validatedData };
   try {
-    const inverterExist = await InverterModel.findOne({ maker: payload.maker, model: payload.model }).lean();
-    if (inverterExist) {
-      return res.status(409).json({ success: false, message: "Inversor já registrado" });
-    }
     const newInverter = await InverterModel.create(payload);
     res.status(201).json({ success: true, data: newInverter });
   } catch (err) {

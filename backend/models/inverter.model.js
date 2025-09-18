@@ -3,9 +3,9 @@ import mongoose, { Schema } from "mongoose";
 
 const mpptSchema = new Schema(
   {
-    dcMaxCurrent: { type: Number, required: true, min: 0 }, // A (per MPPT)
-    scCurrent: { type: Number, min: 0 }, // A (per MPPT)
-    pvStringCount: { type: Number, required: true, min: 1, default: 1 },
+    dcMaxCurrent: { type: Number }, // A
+    scCurrent: { type: Number }, // A
+    pvStringCount: { type: Number }, // per MPPT
   },
   { _id: false }
 );
@@ -13,39 +13,39 @@ const mpptSchema = new Schema(
 const inverterSchema = new Schema(
   {
     // Basic Information
-    maker: { type: String, required: true, trim: true },
-    model: { type: String, required: true, trim: true },
-    inmetro: { type: String, required: true, trim: true },
-    price: { type: Number, required: true, min: 0 },
-    // datasheetUrl: { type: String, trim: true },
-    // image: { type: String, trim: true },
+    maker: { type: String }, // manufacturer
+    model: { type: String }, // model name/number
+    inmetro: { type: String }, // certification number
+    price: { type: Number }, // R$
+    // datasheetUrl: { type: String },
+    // image: { type: String },
 
     // Input DC
-    dcMaxPower: { type: Number, required: true, min: 0 }, // W (DC)
-    dcNominalVoltage: { type: Number, min: 0 }, // V (DC)
+    dcMaxPower: { type: Number }, // W
+    dcNominalVoltage: { type: Number }, // V
     dcVoltage: {
-      min: { type: Number, required: true, min: 0 }, // V (DC)
-      max: { type: Number, required: true, min: 0 }, // V (DC)
+      min: { type: Number }, // V
+      max: { type: Number }, // V
     },
-    startUpVoltage: { type: Number, required: true, min: 0 }, // V (DC)
-    mpptConfig: { type: [mpptSchema], required: true },
+    startUpVoltage: { type: Number }, // V
+    mpptConfig: { type: [mpptSchema] },
 
     // Output AC
-    acNominalPower: { type: Number, required: true, min: 0 }, // W (AC)
-    acNominalVoltage: { type: Number, required: true, default: 220 }, // V (AC)
-    acMaxCurrent: { type: Number, min: 0, required: true }, // A (AC)
-    frequency: { type: Number, default: 60 }, // Hz
-    thd: { type: Number, default: 3 }, // %
+    acNominalPower: { type: Number }, // W
+    acNominalVoltage: { type: Number }, // V
+    acMaxCurrent: { type: Number }, // A
+    frequency: { type: Number }, // Hz
+    thd: { type: Number }, // %
     powerFactor: {
-      i: { type: Number, default: 0.8 }, // Inductive
-      c: { type: Number, default: 0.8 }, // Capacitive
+      i: { type: Number }, // Inductive
+      c: { type: Number }, // Capacitive
     },
-    connectionType: { type: String, enum: ["single-phase", "three-phase"], default: "single-phase" },
+    connectionType: { type: String }, // single-phase, three-phase
 
     // Efficiency
     efficiency: {
-      max: { type: Number, min: 0, max: 100 }, // %
-      european: { type: Number, min: 0, max: 100 }, // %
+      max: { type: Number }, // %
+      european: { type: Number }, // %
     },
 
     // Mechanical Specifications
@@ -54,16 +54,18 @@ const inverterSchema = new Schema(
       length: { type: Number }, // m
       depth: { type: Number }, // m
     },
-    weight: { type: Number, min: 0 },
-    protection: { type: String, trim: true },
+    weight: { type: Number }, // kg
+    protection: { type: String }, // e.g., IP65
     connectors: {
-      dc: { type: String, default: "MC4" },
-      ac: { type: String, default: "Plug and Play" },
+      dc: { type: String }, // e.g., MC4
+      ac: { type: String }, // e.g., Plug and Play
     },
   },
   {
     timestamps: true,
     versionKey: false,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 

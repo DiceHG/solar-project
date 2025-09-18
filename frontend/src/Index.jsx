@@ -9,7 +9,7 @@ const Index = () => {
       </Link>
       <br />
       <Link to="/equipments">
-        <button>Inverter</button>
+        <button>Equipments</button>
       </Link>
     </div>
   );

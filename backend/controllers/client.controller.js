@@ -3,18 +3,12 @@ import mongoose from "mongoose";
 
 import ClientModel from "../models/client.model.js";
 import ProjectModel from "../models/project.model.js";
-// import LocationModel from "../models/location.model.js";
+import SiteModel from "../models/site.model.js";
 
 // GET /api/clients
 export const getClients = async (req, res, next) => {
   try {
-    const clients = await ClientModel.find()
-      .select("_id name phoneNumber email createdAt")
-      .sort({ createdAt: -1 })
-      .lean();
-    if (clients.length === 0) {
-      return res.status(200).json({ success: true, data: [], message: "Nenhum cliente encontrado" });
-    }
+    const clients = await ClientModel.find().sort({ createdAt: -1 }).lean();
     res.status(200).json({ success: true, data: clients });
   } catch (err) {
     console.error(`Error in getting clients ${err}`);
@@ -29,11 +23,20 @@ export const getClientById = async (req, res, next) => {
     return res.status(400).json({ success: false, message: "ID de cliente inválido" });
   }
   try {
-    const client = await ClientModel.findById(id).lean();
+    const client = await ClientModel.findById(id)
+      .populate({
+        path: "projects",
+        options: { sort: { createdAt: -1 } },
+        populate: {
+          path: "sites",
+          options: { sort: { createdAt: -1 } },
+        },
+      })
+      .lean();
     if (!client) return res.status(404).json({ success: false, message: "Cliente não encontrado" });
     res.status(200).json({ success: true, data: client });
   } catch (err) {
-    console.error(`Error in getting client ${err}`);
+    console.error(`Error in getting client by id ${err}`);
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
@@ -42,10 +45,6 @@ export const getClientById = async (req, res, next) => {
 export const createClient = async (req, res, next) => {
   const payload = { ...req.validatedData };
   try {
-    const clientExist = await ClientModel.findOne({ docNumber: payload.docNumber }).lean();
-    if (clientExist) {
-      return res.status(409).json({ success: false, message: "Cliente já registrado" });
-    }
     const newClient = await ClientModel.create(payload);
     res.status(201).json({ success: true, data: newClient });
   } catch (err) {
@@ -65,14 +64,16 @@ export const updateClient = async (req, res, next) => {
     return res.status(400).json({ success: false, message: "ID de cliente inválido" });
   }
   try {
-    const updatedClient = await ClientModel.findByIdAndUpdate(id, payload, { new: true }).lean();
+    const updatedClient = await ClientModel.findOneAndReplace({ _id: id }, payload, {
+      new: true,
+    }).lean();
     if (!updatedClient) {
       return res.status(404).json({ success: false, message: "Cliente não encontrado" });
     }
-    res.status(200).json({ success: true, data: updatedClient, message: "Cliente Atualizado com Sucesso" });
+    res.status(200).json({ success: true, data: updatedClient });
   } catch (err) {
     if (err?.code === 11000) {
-      return res.status(409).json({ success: false, message: "Conflito: valores duplicados" });
+      return res.status(409).json({ success: false, message: "Conflito: Valores Duplicados" });
     }
     console.error(`Error in updating client ${err}`);
     res.status(500).json({ success: false, message: "Server Error" });
@@ -87,33 +88,35 @@ export const deleteClient = async (req, res) => {
   }
 
   const sess = await mongoose.startSession();
-  let deleted = { projects: 0, locations: 0 };
+  let deleted = { projects: 0, sites: 0 };
 
   try {
     await sess.withTransaction(async () => {
-      // 1) Delete the client and capture its projects
-      const deletedClient = await ClientModel.findByIdAndDelete(id).session(sess).lean();
-
-      if (!deletedClient) throw new Error("Cliente não encontrado");
+      // 1) Check if client exists
+      const client = await ClientModel.findById({ _id: id }).session(sess);
+      if (!client) throw new Error("Cliente não encontrado");
 
       // 2) Grab project IDs
-      const projectIds = deletedClient.projects;
+      const projects = await ProjectModel.find({ client: id }, { _id: 1 }).session(sess).lean();
+      const projectIds = projects.map((p) => p._id);
 
+      // 3) Delete sites that belong to those projects
       if (projectIds.length) {
-        // 3) Delete projects
-        const projRes = await ProjectModel.deleteMany({ _id: { $in: projectIds } }).session(sess);
-        deleted.projects = projRes.deletedCount ?? 0;
-
-        // 4) Delete
-        // const locRes = await LocationModel.deleteMany({ project: { $in: projectIds } }).session(session);
-        // deleted.locations = locRes.deletedCount ?? 0;
+        const deletedSites = await SiteModel.deleteMany({ project: { $in: projectIds } }).session(sess);
+        deleted.sites = deletedSites.deletedCount ?? 0;
       }
+
+      // 4) Delete the projects
+      const deletedProjects = await ProjectModel.deleteMany({ client: id }).session(sess);
+      deleted.projects = deletedProjects.deletedCount ?? 0;
+
+      // 5) Finally delete the client
+      await ClientModel.findByIdAndDelete(id).session(sess);
     });
 
     return res.status(200).json({
       success: true,
-      message: "Cliente Excluído com Sucesso",
-      deleted,
+      message: `Cliente Excluído com Sucesso, ${deleted.projects} projetos e ${deleted.sites} locais deletados.`,
     });
   } catch (err) {
     if (err.message === "Cliente não encontrado") {

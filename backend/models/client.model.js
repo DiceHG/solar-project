@@ -3,19 +3,27 @@ import mongoose, { Schema } from "mongoose";
 
 const clientSchema = new Schema(
   {
-    entityType: { type: String, enum: ["individual", "company"], required: true, default: "individual" },
-    name: { type: String, required: true, trim: true, minlength: 1 },
-    docNumber: { type: String, required: true, trim: true },
-    email: { type: String, trim: true, lowercase: true },
-    phoneNumber: { type: String, trim: true },
-    originDate: { type: Date },
-    projects: { type: [{ type: Schema.Types.ObjectId, ref: "Project" }], default: [] },
+    entityType: { type: String }, // individual, company
+    name: { type: String }, // full name or company name
+    docNumber: { type: String }, // CPF or CNPJ
+    email: { type: String },
+    phoneNumber: { type: String }, // DDD + number
+    originDate: { type: Date }, // birth date or foundation date
   },
   {
     timestamps: true,
     versionKey: false,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
+
+clientSchema.virtual("projects", {
+  ref: "Project",
+  localField: "_id",
+  foreignField: "client",
+  options: { sort: { createdAt: -1 } },
+});
 
 clientSchema.index({ docNumber: 1 }, { unique: true });
 

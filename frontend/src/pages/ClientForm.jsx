@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { clientSchema } from "../../shared/schemas/client.schema.js";
+import { clientSchema } from "../schemas/client.schema.js";
 import axios from "axios";
 
 const ClientForm = ({ mode = "create" }) => {
@@ -22,29 +22,31 @@ const ClientForm = ({ mode = "create" }) => {
   const entityType = watch("entityType");
 
   useEffect(() => {
-    if (mode === "edit" && id) {
-      (async () => {
+    if (mode === "edit") {
+      const fetchClient = async () => {
         const res = await axios.get(`http://localhost:5000/api/clients/${id}`);
         const client = res.data.data;
         reset({
           ...client,
           originDate: client.originDate ? client.originDate.split("T")[0] : "",
         });
-      })();
+      };
+      fetchClient();
     }
   }, [mode, id, reset]);
 
   const onSubmit = async (data) => {
+    console.log(data);
     try {
       let res;
       if (mode === "create") {
         res = await axios.post("http://localhost:5000/api/clients", data);
-        navigate("/clients", { replace: true });
+        navigate("/clients");
       } else if (mode === "edit") {
         res = await axios.put(`http://localhost:5000/api/clients/${id}`, data);
-        navigate(`/clients/${id}`, { replace: true });
+        navigate(`/clients/${id}`);
       }
-      console.log(res);
+      console.log(res.data);
     } catch (err) {
       console.error(err.response.data);
     }
@@ -53,10 +55,13 @@ const ClientForm = ({ mode = "create" }) => {
   return (
     <>
       <h1>{mode === "create" ? "Cadastrar Cliente" : "Editar Cliente"}</h1>
-      <Link to="/clients">
+
+      <Link to={mode === "create" ? "/clients" : `/clients/${id}`}>
         <button>Voltar</button>
       </Link>
+
       <p>Tipo Cliente</p>
+
       <form onSubmit={handleSubmit(onSubmit)}>
         <input {...register("entityType")} id="individual" type="radio" value="individual" />
         <label htmlFor="individual">Física</label>
@@ -83,7 +88,13 @@ const ClientForm = ({ mode = "create" }) => {
         <label htmlFor="originDate">
           {entityType === "individual" ? "Data de Nascimento" : "Data de Abertura"}
         </label>
-        <input {...register("originDate")} type="date" id="originDate" />
+        <input
+          {...register("originDate", {
+            setValueAs: (v) => (v.trim() === "" ? undefined : v),
+          })}
+          type="date"
+          id="originDate"
+        />
         <p>{errors.originDate?.message}</p>
 
         <button type="submit">Enviar</button>

@@ -5,7 +5,7 @@ import ModuleModel from "../models/module.model.js";
 
 export const getModules = async (req, res, next) => {
   try {
-    const modules = await ModuleModel.find().select("maker model price dimensions maxPower").lean();
+    const modules = await ModuleModel.find().lean();
     if (modules.length === 0) {
       return res.status(200).json({ success: true, data: [], message: "Nenhum módulo encontrado" });
     }
@@ -26,7 +26,7 @@ export const getModuleById = async (req, res, next) => {
     if (!module) return res.status(404).json({ success: false, message: "Módulo não encontrado" });
     res.status(200).json({ success: true, data: module });
   } catch (err) {
-    console.error(`Error in getting module ${err}`);
+    console.error(`Error in getting module by id ${err}`);
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
@@ -34,10 +34,6 @@ export const getModuleById = async (req, res, next) => {
 export const createModule = async (req, res, next) => {
   const payload = { ...req.validatedData };
   try {
-    const moduleExist = await ModuleModel.findOne({ maker: payload.maker, model: payload.model }).lean();
-    if (moduleExist) {
-      return res.status(409).json({ success: false, message: "Módulo já registrado" });
-    }
     const newModule = await ModuleModel.create(payload);
     res.status(201).json({ success: true, data: newModule });
   } catch (err) {

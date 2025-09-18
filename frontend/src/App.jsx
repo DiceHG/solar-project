@@ -1,10 +1,7 @@
 import { Routes, Route } from "react-router";
-import ClientForm from "./clients/pages/ClientForm";
-import ClientList from "./clients/pages/ClientList";
-import ClientPage from "./clients/pages/ClientPage";
-import EquipmentCatalog from "./equipments/EquipmentCatalog";
-import InverterForm from "./equipments/InverterForm";
-import ModuleForm from "./equipments/ModuleForm";
+import ClientForm from "./pages/ClientForm";
+import ClientList from "./pages/ClientList";
+import ClientPage from "./pages/ClientPage";
 import Index from "./Index";
 
 const App = () => {
@@ -18,16 +15,15 @@ const App = () => {
         <Route path=":id/edit" element={<ClientForm mode="edit" />} />
       </Route>
 
-      <Route path="equipments">
-        <Route index element={<EquipmentCatalog />} />
+      {/* <Route path="catalog">
+        <Route index element={<Catalog />} />
         <Route path="inverter/form" element={<InverterForm mode="create" />} />
-        <Route
-          path="inverter/edit/:id"
-          element={<InverterForm mode="edit" />}
-        />
+        <Route path="inverter/:id" element={<InverterForm mode="edit" />} />
+        <Route path="inverter/:id/edit" element={<InverterPage />} />
         <Route path="module/form" element={<ModuleForm mode="create" />} />
-        <Route path="module/edit/:id" element={<ModuleForm mode="edit" />} />
-      </Route>
+        <Route path="module/:id" element={<ModulePage />} />
+        <Route path="module/:id/edit" element={<ModuleForm mode="edit" />} />
+      </Route> */}
     </Routes>
   );
 };

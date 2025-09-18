@@ -4,13 +4,13 @@ import mongoose, { Schema } from "mongoose";
 const moduleSchema = new Schema(
   {
     // Basic Information
-    maker: { type: String, required: true, trim: true },
-    model: { type: String, required: true, trim: true },
-    inmetro: { type: String, required: true, trim: true },
-    warrantyYears: { type: Number },
-    price: { type: Number, required: true, min: 0 },
-    // datasheetUrl: { type: String, trim: true },
-    // image: { type: String, trim: true },
+    maker: { type: String }, // manufacturer
+    model: { type: String }, // model name/number
+    inmetro: { type: String }, // certification number
+    warrantyYears: { type: Number }, // years
+    price: { type: Number }, // R$
+    // datasheetUrl: { type: String },
+    // image: { type: String },
 
     // Mechanical Specifications
     dimensions: {
@@ -19,26 +19,28 @@ const moduleSchema = new Schema(
       depth: { type: Number }, // m
     },
     weight: { type: Number }, // kg
-    cellType: { type: String, trim: true },
+    cellType: { type: String },
     numOfCells: { type: Number },
-    frame: { type: String, trim: true },
-    junctionBox: { type: String, trim: true },
-    cable: { type: String, trim: true },
-    connector: { type: String, trim: true },
+    frame: { type: String },
+    junctionBox: { type: String },
+    cable: { type: String },
+    connector: { type: String },
 
     // Electrical Specifications
-    maxPower: { type: Number, required: true, min: 0 }, // Pmax (W)
-    maxPowerVoltage: { type: Number, required: true, min: 0 }, // Vmp (V)
-    maxPowerCurrent: { type: Number, required: true, min: 0 }, // Imp (A)
-    ocVoltage: { type: Number, min: 0 }, // Voc (V)
-    scCurrent: { type: Number, min: 0 }, // Isc (A)
-    efficiency: { type: Number, min: 0, max: 100 }, // %
-    maxSystemVoltage: { type: Number, min: 0 }, // VDC (V)
-    maxSeriesFuse: { type: Number, min: 0 }, // (A)
+    maxPower: { type: Number }, // Pmax (W)
+    maxPowerVoltage: { type: Number }, // Vmp (V)
+    maxPowerCurrent: { type: Number }, // Imp (A)
+    ocVoltage: { type: Number }, // Voc (V)
+    scCurrent: { type: Number }, // Isc (A)
+    efficiency: { type: Number }, // %
+    maxSystemVoltage: { type: Number }, // VDC (V)
+    maxSeriesFuse: { type: Number }, // (A)
   },
   {
     timestamps: true,
     versionKey: false,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 

@@ -4,7 +4,7 @@ import axios from "axios";
 
 import InverterPage from "./InverterPage";
 import ModulePage from "./ModulePage";
-import Modal from "../shared/components/Modal";
+import Modal from "../components/Modal";
 
 const EquipmentCatalog = () => {
   const [inverters, setInverters] = useState([]);
@@ -62,15 +62,9 @@ const EquipmentCatalog = () => {
       {isModalOpen && (
         <Modal closeModal={closeModal}>
           {selectedEquipment.type === "inverter" ? (
-            <InverterPage
-              inverterId={selectedEquipment.equipment._id}
-              onDelete={handleDelete}
-            />
+            <InverterPage inverterId={selectedEquipment.equipment._id} onDelete={handleDelete} />
           ) : (
-            <ModulePage
-              moduleId={selectedEquipment.equipment._id}
-              onDelete={handleDelete}
-            />
+            <ModulePage moduleId={selectedEquipment.equipment._id} onDelete={handleDelete} />
           )}
         </Modal>
       )}
@@ -110,17 +104,18 @@ const EquipmentCatalog = () => {
               <th>Modelo</th>
               <th>Fabricante</th>
               <th>Potência (kW)</th>
+              <th>Tipo de Conexão</th>
+              <th>Tensão</th>
             </tr>
           </thead>
           <tbody>
             {inverters.map((inverter) => (
-              <tr
-                key={inverter._id}
-                onClick={() => openModal("inverter", inverter)}
-              >
+              <tr key={inverter._id} onClick={() => openModal("inverter", inverter)}>
                 <td>{inverter.model}</td>
                 <td>{inverter.maker}</td>
-                <td>{inverter.maxOutputPower}</td>
+                <td>{inverter.acNominalPower}</td>
+                <td>{inverter.connectionType}</td>
+                <td>{inverter.acNominalVoltage}</td>
               </tr>
             ))}
           </tbody>
