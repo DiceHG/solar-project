@@ -71,21 +71,5 @@ export function isValidCNPJ(input) {
   const secondDigit = calcCheckDigit(13); // Calculate the second validation digit (14th digit) using the first 13 digits
 
   // Check if both calculated digits match the input CNPJ digits
-  return (
-    firstDigit === parseInt(cnpj[12]) && secondDigit === parseInt(cnpj[13])
-  );
+  return firstDigit === parseInt(cnpj[12]) && secondDigit === parseInt(cnpj[13]);
 }
-
-export const fetchViaCep = async (cep) => {
-  const address = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-  const { uf, localidade, bairro, logradouro, complemento } =
-    await address.json();
-
-  return {
-    state: uf,
-    city: localidade,
-    district: bairro, // maybe change it to neighborhood
-    street: logradouro,
-    complement: complemento,
-  };
-};

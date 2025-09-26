@@ -3,6 +3,24 @@ import mongoose from "mongoose";
 
 import SiteModel from "../models/site.model.js";
 
+// GET /api/sites/:id
+export const getSiteById = async (req, res, next) => {
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ success: false, message: "ID de Local Inválido" });
+  }
+  try {
+    const site = await SiteModel.findById(id).lean();
+    if (!site) {
+      return res.status(404).json({ success: false, message: "Local não encontrado" });
+    }
+    res.status(200).json({ success: true, data: site });
+  } catch (err) {
+    console.error(`Error in fetching location ${err}`);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
 // POST /api/sites
 export const createSite = async (req, res, next) => {
   const payload = { ...req.validatedData };

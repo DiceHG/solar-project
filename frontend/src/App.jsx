@@ -15,7 +15,7 @@ const App = () => {
         <Route path=":id/edit" element={<ClientForm mode="edit" />} />
       </Route>
 
-      {/* <Route path="catalog">
+      <Route path="catalog">
         <Route index element={<Catalog />} />
         <Route path="inverter/form" element={<InverterForm mode="create" />} />
         <Route path="inverter/:id" element={<InverterForm mode="edit" />} />
@@ -23,7 +23,7 @@ const App = () => {
         <Route path="module/form" element={<ModuleForm mode="create" />} />
         <Route path="module/:id" element={<ModulePage />} />
         <Route path="module/:id/edit" element={<ModuleForm mode="edit" />} />
-      </Route> */}
+      </Route>
     </Routes>
   );
 };

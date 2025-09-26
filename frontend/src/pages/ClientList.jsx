@@ -49,7 +49,7 @@ const ClientList = () => {
                   <td>{client.name}</td>
                   <td>{client.email ? client.email : "N/A"}</td>
                   <td>{client.phoneNumber ? client.phoneNumber : "N/A"}</td>
-                  <td>{client.createdAt?.split("T")[0].split("-").reverse().join("/")}</td>
+                  <td>{client.createdAt.split("T")[0].split("-").reverse().join("/")}</td>
                 </tr>
               ))}
             </tbody>

@@ -6,3 +6,10 @@ export const filterDigits = (s) => {
   }
   return undefined;
 };
+
+export const trimString = (s) => {
+  if (typeof s === "string" && s.trim() !== "") {
+    return s.trim();
+  }
+  return undefined;
+};

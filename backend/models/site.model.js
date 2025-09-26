@@ -26,7 +26,7 @@ const siteSchema = new Schema(
     accountHolder: { type: String },
     serviceType: {
       class: { type: String }, // residential, commercial, industrial
-      phase: { type: String }, // single-phase, two-phase, three-phase
+      connection: { type: String }, // single-phase, two-phase, three-phase
       voltage: { type: Number }, // V
       circuitBreaker: { type: Number }, // A
     },
@@ -39,9 +39,6 @@ const siteSchema = new Schema(
 
     // Energy consumption
     consumption: { type: [Number] }, // kW monthly
-
-    // Site photos or documents
-    // sitePhotos: { type: [String] },
   },
   {
     timestamps: true,
